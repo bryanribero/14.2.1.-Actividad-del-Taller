@@ -1,14 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('miFormulario');
-    const inputs = form.querySelectorAll('input');
-    
+    const inputs = form.querySelectorAll('input:not([type="checkbox"])'); // Excluir el checkbox de términos
+    const checkbox = document.getElementById('terminos'); // El checkbox de términos
+    const termsLink = document.querySelector('button[data-bs-target="#modalTerminos"]'); // El enlace de los términos
 
     function validateInput(input) {
         const value = input.value.trim();
         let isValid = true;
         let errorMessage = '';
 
-        switch(input.id) {
+        switch (input.id) {
             case 'nombre':
             case 'apellido':
                 isValid = value !== '';
@@ -28,10 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     isValid = value === password1.value;
                     errorMessage = isValid ? '' : 'Las contraseñas no coinciden';
                 }
-                break;
-            case 'terminos':
-                isValid = input.checked;
-                errorMessage = isValid ? '' : 'Debes aceptar los términos';
                 break;
         }
 
@@ -59,6 +56,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function validateCheckbox(checkbox) {
+        let isValid = checkbox.checked;
+        const errorElement = document.createElement('div');
+        errorElement.classList.add('invalid-feedback');
+
+        if (!isValid) {
+            checkbox.classList.add('is-invalid');
+            termsLink.classList.add('text-danger'); // Cambia el color del enlace a rojo
+            errorElement.textContent = 'Debes aceptar los términos';
+            checkbox.parentNode.appendChild(errorElement);
+        } else {
+            checkbox.classList.remove('is-invalid');
+            termsLink.classList.remove('text-danger'); // Quita el color rojo del enlace
+            const feedback = checkbox.parentNode.querySelector('.invalid-feedback');
+            if (feedback) feedback.remove();
+        }
+
+        return isValid;
+    }
+
     inputs.forEach(input => {
         input.addEventListener('input', function() {
             validateInput(this);
@@ -75,11 +92,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        if (!validateCheckbox(checkbox)) {
+            isFormValid = false;
+        }
+
         if (isFormValid) {
             console.log('Formulario válido, se puede enviar');
             // Aquí puedes agregar el código para enviar el formulario
         } else {
             console.log('Formulario inválido, corregir errores');
         }
+    });
+
+    checkbox.addEventListener('change', function() {
+        validateCheckbox(checkbox);
     });
 });
